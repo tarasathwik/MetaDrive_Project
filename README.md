@@ -27,12 +27,12 @@ To ensure safety during this aggressive optimization, the system implements an A
 
 ---
 
-## Installation
+## Installation (Standard Python)
 
 ### Prerequisites
-* **Python 3.10** (Strict requirement: MetaDrive allows 3.6-3.11, but dependencies are most stable on 3.10).
-* [MetaDrive Simulator](https://github.com/metadriverse/metadrive)
-* PyTorch & Stable Baselines3
+* **Python 3.10** (Strict requirement).
+    * **Windows:** Download the [Python 3.10 Installer](https://www.python.org/downloads/release/python-31011/) (Scroll to "Files" -> "Windows installer (64-bit)").
+    * **Mac/Linux:** Use your package manager (e.g., `brew install python@3.10` or `sudo apt install python3.10`).
 
 ### Setup Instructions
 
@@ -42,32 +42,37 @@ To ensure safety during this aggressive optimization, the system implements an A
     cd MetaDrive_Project
     ```
 
-2.  **Create a Conda Environment (Recommended):**
-    We strictly recommend using a fresh Conda environment to avoid version conflicts with system Python.
+2.  **Create a Virtual Environment:**
+    We must explicitly use the Python 3.10 executable to create the environment.
+
+    **Windows:**
     ```bash
-    # Create env with specific Python version
-    conda create -n metadrive_env python=3.10 -y
+    # If you installed Python 3.10 correctly, the 'py' launcher handles versions:
+    py -3.10 -m venv venv
     
-    # Activate the environment
-    conda activate metadrive_env
+    # Activate it:
+    .\venv\Scripts\activate
+    ```
+
+    **Mac/Linux:**
+    ```bash
+    # Point to the specific 3.10 binary
+    python3.10 -m venv venv
+    
+    # Activate it:
+    source venv/bin/activate
     ```
 
 3.  **Install Dependencies:**
     ```bash
-    # Install PyTorch (adjust for your specific CUDA version if needed)
-    pip install torch --index-url [https://download.pytorch.org/whl/cu118](https://download.pytorch.org/whl/cu118)
-    
-    # Install project requirements
     pip install -r requirements.txt
     ```
 
 4.  **Verify Installation:**
-    Run this quick test to ensure the simulator window opens:
+    Check that the simulator launches:
     ```bash
-    python -c "from metadrive.envs import MetaDriveEnv; env=MetaDriveEnv(dict(use_render=False)); env.reset(); print('MetaDrive successfully installed!')"
+    python scripts/play_game.py
     ```
-
----
 
 ## Mathematical Methodology
 
@@ -117,3 +122,4 @@ This framework combines modern RL algorithms with rigorous safety constraints.
 Run the manual control script to generate expert demonstrations for Imitation Learning.
 ```bash
 python scripts/collect_data.py --episodes 10
+
