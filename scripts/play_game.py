@@ -2,7 +2,9 @@ import gymnasium as gym
 from metadrive.envs import MetaDriveEnv
 import keyboard
 import numpy as np
-
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 # --- TUNING ---
 STEER_SPEED = 0.08      
 STEER_RETURN = 0.15     
@@ -112,4 +114,5 @@ def run_arcade_traffic():
         env.close()
 
 if __name__ == "__main__":
+
     run_arcade_traffic()
