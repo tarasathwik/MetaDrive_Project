@@ -1,15 +1,18 @@
+# --- PYTHON VERSION: 3.10 REQUIRED ---
+
 # --- Simulation Environment ---
 metadrive-simulator>=0.4.0
 gymnasium>=0.28.1
 pygame>=2.1.0
 
 # --- Deep Learning & RL ---
+# Note: PPO implementation relies on Stable-Baselines3
 torch>=2.0.0
 numpy>=1.24.0
 stable-baselines3>=2.0.0
-imitation>=0.4.0
+imitation>=0.4.0 
 
-# --- Utilities & Visualization ---
+# --- Utilities ---
 tensorboard>=2.10.0
 opencv-python
 matplotlib
