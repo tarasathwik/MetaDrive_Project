@@ -1,4 +1,4 @@
-# AI-Based Autonomous Driving Simulation with PPO & Imitation Learning
+# AI-Based Autonomous Car Driving Simulation with PPO & Imitation Learning
 **A Safe Reinforcement Learning Framework for Competitive Racing**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -122,4 +122,5 @@ This framework combines modern RL algorithms with rigorous safety constraints.
 Run the manual control script to generate expert demonstrations for Imitation Learning.
 ```bash
 python scripts/collect_data.py --episodes 10
+
 
