@@ -17,22 +17,20 @@ def run_arcade_traffic():
         "start_seed": 1000,
         
         # --- INCREASED TRAFFIC ---
-        # Changed from 0.1 to 0.15
-        # Be careful overtaking!
-        "traffic_density": 0.15,
+        "traffic_density": 0.07,
         "random_traffic": True,
-        
+        "traffic_mode": "respawn"
         "manual_control": False,
         "use_render": True,
         "window_size": (1000, 800),
         "vehicle_config": {
             "lidar": {"num_lasers": 72, "distance": 40, "num_others": 4},
-            "show_lidar": True,
+            "show_lidar": False,
             "enable_reverse": True,
         }
     }
     
-    print("Initializing Arcade Traffic Mode...")
+    print("Initializing Environment")
     env = MetaDriveEnv(config)
     
     current_steer = 0.0
@@ -40,12 +38,6 @@ def run_arcade_traffic():
     
     try:
         obs, info = env.reset()
-        print("\n" + "="*40)
-        print("  ARCADE MODE: HEAVY TRAFFIC")
-        print("  ---------------------")
-        print("  Density: 0.15 (Watch your mirrors!)")
-        print("  Controls: Arrows + Space")
-        print("="*40 + "\n")
         
         while True:
             # --- 1. SMOOTH STEERING ---
@@ -116,3 +108,4 @@ def run_arcade_traffic():
 if __name__ == "__main__":
 
     run_arcade_traffic()
+
