@@ -4,11 +4,13 @@ import keyboard
 import numpy as np
 import sys
 import os
+
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 # --- TUNING ---
 STEER_SPEED = 0.08      
 STEER_RETURN = 0.15     
-THROTTLE_SPEED = 0.05   
+THROTTLE_SPEED = 0.2    # INCREASED: Fixes the slow start line acceleration
 BRAKE_SPEED = 0.2       
 
 def run_arcade_traffic():
@@ -19,7 +21,7 @@ def run_arcade_traffic():
         # --- INCREASED TRAFFIC ---
         "traffic_density": 0.07,
         "random_traffic": True,
-        "traffic_mode": "respawn"
+        "traffic_mode": "respawn", # FIXED: Added missing comma
         "manual_control": False,
         "use_render": True,
         "window_size": (1000, 800),
@@ -90,7 +92,15 @@ def run_arcade_traffic():
             
             # --- 3. APPLY ---
             action = [current_steer, current_throttle]
-            env.step(action)
+            
+            # FIXED: Unpacking gymnasium returns and adding reset logic
+            obs, reward, terminated, truncated, info = env.step(action)
+            
+            if terminated or truncated:
+                obs, info = env.reset()
+                current_steer = 0.0
+                current_throttle = 0.0
+                continue
             
             env.render(
                 text={
@@ -106,6 +116,4 @@ def run_arcade_traffic():
         env.close()
 
 if __name__ == "__main__":
-
     run_arcade_traffic()
-
