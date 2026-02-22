@@ -78,39 +78,72 @@ To ensure safety during this aggressive optimization, the system implements an A
 
 This framework combines modern RL algorithms with rigorous safety constraints.
 
-### 1. Hybrid Learning Architecture
+## 1. Hybrid Learning Architecture
 
-* **Stage I: Imitation Learning (Behavioral Cloning):**
-  We minimize the divergence between the agent's policy and the expert's actions using the Behavioral Cloning loss:
-  
-  $$
-  L_{BC}(\theta) = \mathbb{E}_{(s, a^*) \sim \mathcal{D}_{\text{expert}}} \left[ \lVert \pi_{\theta}(s) - a^* \rVert^2_2 \right]
-  $$
+### Stage I: Imitation Learning (Behavioral Cloning)
 
-* **Stage II: Proximal Policy Optimization (PPO):**
-  We optimize the policy using the clipped surrogate objective to ensure stable updates:
-  
-  $$
-  L^{CLIP}(\theta) = \hat{\mathbb{E}}_t \left[ \min(r_t(\theta)\hat{A}_t, \text{clip}(r_t(\theta), 1-\epsilon, 1+\epsilon)\hat{A}_t) \right]
-  $$
+We minimize the divergence between the agent’s policy and expert actions using the Behavioral Cloning (BC) loss:
 
-### 2. Safety Mechanisms
+```math
+L_{\text{BC}}(\theta)
+=
+\mathbb{E}_{(s, a^*) \sim \mathcal{D}_{\text{expert}}}
+\left[
+\left\| \pi_\theta(s) - a^* \right\|_2^2
+\right]
+```
 
-* **Action Mapping (Traction Control):**
-  To prevent skidding, we enforce the **Friction Circle Constraint**. The total force applied by the agent must strictly adhere to the physical limits of tire friction.
-  
-  $$
-  |\vec{F}_x + \vec{F}_y| < \mu_{\text{max}} F_z
-  $$
-  
-  We implement a projection function $H_{AM}$ that maps unsafe actions back onto this safe boundary.
+---
 
-* **State Mapping (Dynamic Perception):**
-  For competitive overtaking, we transform raw track observations into a "Feasible Area" vector based on opponent positions.
-  
-  $$
-  \hat{V}_E = H_{SM}(V_E, V_C)
-  $$
+### Stage II: Proximal Policy Optimization (PPO)
+
+After imitation pretraining, the policy is fine-tuned using Proximal Policy Optimization with a clipped surrogate objective to ensure stable updates:
+
+```math
+L^{\text{CLIP}}(\theta)
+=
+\mathbb{E}_t
+\left[
+\min \left(
+r_t(\theta)\,\hat{A}_t,\;
+\text{clip}\!\left(r_t(\theta), 1-\epsilon, 1+\epsilon\right)\hat{A}_t
+\right)
+\right]
+```
+
+where
+
+```math
+r_t(\theta) = \frac{\pi_\theta(a_t \mid s_t)}{\pi_{\theta_{\text{old}}}(a_t \mid s_t)}
+```
+
+---
+
+## 2. Safety Mechanisms
+
+### Action Mapping (Traction Control)
+
+To prevent skidding, the agent’s actions are constrained by the **Friction Circle Constraint**, ensuring adherence to tire friction limits:
+
+```math
+\sqrt{F_x^2 + F_y^2} \le \mu_{\text{max}} F_z
+```
+
+Unsafe actions are projected back onto the feasible set using an action-mapping function:
+
+```math
+a_{\text{safe}} = H_{\text{AM}}(a)
+```
+
+---
+
+### State Mapping (Dynamic Perception)
+
+For competitive overtaking, raw track observations are transformed into a feasible state representation based on ego and opponent dynamics:
+
+```math
+\hat{V}_E = H_{\text{SM}}(V_E, V_C)
+```
   
   This allows the agent to perceive the track as a dynamic corridor, ignoring blocked lanes.
 
@@ -168,4 +201,5 @@ Despite the aggressive exploration phase and high KL variance, the agent success
 ## Future Work
 * **Multi-Agent Racing**: Expanding the framework to handle adversarial RL vehicles rather than standard traffic.
 * **Dynamic Friction Adapting**: Modifying the Action Mapping constraint to account for variable weather or track surfaces dynamically.
+
 
