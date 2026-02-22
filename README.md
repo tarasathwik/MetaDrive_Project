@@ -172,7 +172,7 @@ python scripts/test_final_agent.py
 
 ---
 
-## 📊 Training Dynamics & Findings
+## Training Dynamics & Findings
 
 The model was trained for **500,000 steps** following the initial Imitation Learning phase. The TensorBoard metrics revealed unique learning dynamics characteristic of high-speed autonomous racing:
 
@@ -201,5 +201,6 @@ Despite the aggressive exploration phase and high KL variance, the agent success
 ## Future Work
 * **Multi-Agent Racing**: Expanding the framework to handle adversarial RL vehicles rather than standard traffic.
 * **Dynamic Friction Adapting**: Modifying the Action Mapping constraint to account for variable weather or track surfaces dynamically.
+
 
 
