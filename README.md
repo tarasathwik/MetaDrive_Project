@@ -83,26 +83,34 @@ This framework combines modern RL algorithms with rigorous safety constraints.
 * **Stage I: Imitation Learning (Behavioral Cloning):**
   We minimize the divergence between the agent's policy and the expert's actions using the Behavioral Cloning loss:
   
-  $$L_{BC}(\theta) = \mathbb{E}_{(s, a^*)\sim \mathcal{D}_{expert}} \left[ ||\pi_{\theta}(s) - a^*||^2_2 \right]$$
+  $$
+  L_{BC}(\theta) = \mathbb{E}_{(s, a^*) \sim \mathcal{D}_{\text{expert}}} \left[ \lVert \pi_{\theta}(s) - a^* \rVert^2_2 \right]
+  $$
 
 * **Stage II: Proximal Policy Optimization (PPO):**
   We optimize the policy using the clipped surrogate objective to ensure stable updates:
   
-  $$L^{CLIP}(\theta) = \hat{\mathbb{E}}_t \left[ \min(r_t(\theta)\hat{A}_t, \text{clip}(r_t(\theta), 1-\epsilon, 1+\epsilon)\hat{A}_t) \right]$$
+  $$
+  L^{CLIP}(\theta) = \hat{\mathbb{E}}_t \left[ \min(r_t(\theta)\hat{A}_t, \text{clip}(r_t(\theta), 1-\epsilon, 1+\epsilon)\hat{A}_t) \right]
+  $$
 
 ### 2. Safety Mechanisms
 
 * **Action Mapping (Traction Control):**
   To prevent skidding, we enforce the **Friction Circle Constraint**. The total force applied by the agent must strictly adhere to the physical limits of tire friction.
   
-  $$|\vec{F}_{x} + \vec{F}_{y}| < \mu_{max} F_{z}$$
+  $$
+  |\vec{F}_x + \vec{F}_y| < \mu_{\text{max}} F_z
+  $$
   
   We implement a projection function $H_{AM}$ that maps unsafe actions back onto this safe boundary.
 
 * **State Mapping (Dynamic Perception):**
   For competitive overtaking, we transform raw track observations into a "Feasible Area" vector based on opponent positions.
   
-  $$\hat{V}_{E} = H_{SM}(V_{E}, V_{C})$$
+  $$
+  \hat{V}_E = H_{SM}(V_E, V_C)
+  $$
   
   This allows the agent to perceive the track as a dynamic corridor, ignoring blocked lanes.
 
@@ -160,3 +168,4 @@ Despite the aggressive exploration phase and high KL variance, the agent success
 ## Future Work
 * **Multi-Agent Racing**: Expanding the framework to handle adversarial RL vehicles rather than standard traffic.
 * **Dynamic Friction Adapting**: Modifying the Action Mapping constraint to account for variable weather or track surfaces dynamically.
+
