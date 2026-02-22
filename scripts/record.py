@@ -8,22 +8,17 @@ import numpy as np
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from metadrive.envs import MetaDriveEnv
-from metadrive.policy.expert_policy import ExpertPolicy
+from metadrive.policy.expert_policy import expert  # FIXED: Importing the function
 
 # --- ALIGNED CONFIGURATION ---
 config = {
     "num_scenarios": 50,
     "start_seed": 1000,
-    
-    # --- HEAVY TRAFFIC (Matches play_game.py) ---
     "traffic_density": 0.07,
     "random_traffic": True,
     "traffic_mode": "respawn",
-    
-    # --- EXPERT OVERRIDES ---
-    "manual_control": False,   # Must be False for the PID Expert to drive
-    "use_render": False,       # Headless mode for rapid data generation
-    
+    "manual_control": False,
+    "use_render": False,
     "window_size": (1000, 800),
     "vehicle_config": {
         "lidar": {"num_lasers": 72, "distance": 40, "num_others": 4},
@@ -32,13 +27,10 @@ config = {
     }
 }
 
-def record_expert_data(target_steps=50000, save_dir="training_data", filename="user_driving_data.pkl"):
+def record_expert_data(target_steps=50000, save_dir="data", filename="user_driving_data.pkl"):
     
     # Initialize Environment
     env = MetaDriveEnv(config)
-    
-    # Instantiate the Built-in PID Expert
-    expert = ExpertPolicy()
     
     # Data Buffer
     dataset = []
@@ -58,15 +50,14 @@ def record_expert_data(target_steps=50000, save_dir="training_data", filename="u
         obs, info = env.reset()
         
         while collected_steps < target_steps:
-            # 1. Ask the PID expert for the mathematically optimal action
+            # FIXED: Calling the expert function directly on the vehicle object
             current_action = expert(env.vehicle)
             
-            # 2. Step Environment
+            # Step Environment
             next_obs, reward, terminated, truncated, info = env.step(current_action)
             done = terminated or truncated
             
-            # 3. Filter & Record
-            # Use speed threshold to avoid recording idle/starting noise
+            # Filter & Record
             speed = env.vehicle.speed_km_h
             if speed > 0.5: 
                 dataset.append({
