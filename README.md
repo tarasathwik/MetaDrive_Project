@@ -202,7 +202,7 @@ Despite the aggressive exploration phase and high KL variance, the agent success
 * **Multi-Agent Racing**: Expanding the framework to handle adversarial RL vehicles rather than standard traffic.
 * **Dynamic Friction Adapting**: Modifying the Action Mapping constraint to account for variable weather or track surfaces dynamically.
 
-## 📚 Acknowledgments & References
+## Acknowledgments & References
 
 This project was developed to explore safe reinforcement learning architectures. To ensure academic integrity and open-source compliance, the following libraries, frameworks, and research papers are explicitly acknowledged:
 
@@ -217,10 +217,11 @@ This project was developed to explore safe reinforcement learning architectures.
 
 ---
 
-## ⚖️ License
+## License
 
 This project's original code is licensed under the **MIT License**. 
 
 *Note: Third-party libraries and environments (such as MetaDrive and Stable Baselines3) remain under their respective original open-source licenses.*
+
 
 
