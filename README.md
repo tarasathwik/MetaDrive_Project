@@ -202,5 +202,25 @@ Despite the aggressive exploration phase and high KL variance, the agent success
 * **Multi-Agent Racing**: Expanding the framework to handle adversarial RL vehicles rather than standard traffic.
 * **Dynamic Friction Adapting**: Modifying the Action Mapping constraint to account for variable weather or track surfaces dynamically.
 
+## 📚 Acknowledgments & References
+
+This project was developed to explore safe reinforcement learning architectures. To ensure academic integrity and open-source compliance, the following libraries, frameworks, and research papers are explicitly acknowledged:
+
+### Core Frameworks
+* **MetaDrive Simulator**: The core autonomous driving environment, LiDAR physics, and 3D rendering were provided by the [MetaDrive](https://github.com/metadriverse/metadrive) open-source project.
+* **RL & Deep Learning**: The implementation of Proximal Policy Optimization (PPO) and the underlying neural network architectures were built using [Stable Baselines3](https://github.com/DLR-RM/stable-baselines3) and PyTorch.
+* **Environment Wrappers**: The Action Mapping and State Mapping safety mechanisms were engineered by extending the standard `gymnasium` (formerly OpenAI Gym) API.
+
+### Academic Literature
+* **Proximal Policy Optimization**: Schulman, J., Wolski, F., Dhariwal, P., Radford, A., & Klimov, O. (2017). *Proximal Policy Optimization Algorithms*. arXiv preprint arXiv:1707.06347.
+* **Behavioral Cloning**: Pomerleau, D. A. (1989). *ALVINN: An Autonomous Land Vehicle in a Neural Network*. Advances in Neural Information Processing Systems.
+
+---
+
+## ⚖️ License
+
+This project's original code is licensed under the **MIT License**. 
+
+*Note: Third-party libraries and environments (such as MetaDrive and Stable Baselines3) remain under their respective original open-source licenses.*
 
 
