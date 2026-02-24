@@ -2,11 +2,31 @@ import os
 import sys
 import psutil
 import time
+import gymnasium as gym
 from stable_baselines3 import PPO
 from stable_baselines3.common.callbacks import CheckpointCallback
 from metadrive.envs import MetaDriveEnv
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+# Import your custom B.Tech safety package
+from src.safety import ActionMapWrapper, StateMapWrapper
+
+# --- COMPATIBILITY FIX ---
+class CompatWrapper(gym.Wrapper):
+    """Fixes API mismatch by stripping 'options' and ensuring tuple returns."""
+    def reset(self, *, seed=None, options=None):
+        kwargs = {}
+        if seed is not None:
+            kwargs['seed'] = seed
+            
+        result = self.env.reset(**kwargs)
+        
+        # Gymnasium/SB3 requires an (obs, info) tuple format
+        if isinstance(result, tuple) and len(result) == 2:
+            return result
+        else:
+            return result, {}
 
 # --- MAX PERFORMANCE CONFIGURATION ---
 config = {
@@ -32,12 +52,22 @@ def set_high_priority():
 def train_rl_agent(timesteps=500000):
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     model_load_path = os.path.join(base_dir, "models", "bc_pretrained_ppo.zip")
-    log_dir = os.path.join(base_dir, "logs", "ppo_tensorboard") # TensorBoard directory
+    log_dir = os.path.join(base_dir, "logs", "ppo_tensorboard") 
     
     set_high_priority()
+    
+    # 1. Initialize the raw environment
     env = MetaDriveEnv(config)
+    
+    # 2. Patch the environment to fix the API crash
+    env = CompatWrapper(env)
+    
+    # 3. Apply Mathematical Safety Constraints
+    print("Applying State and Action Mappers...")
+    env = StateMapWrapper(env)
+    env = ActionMapWrapper(env, max_friction=1.0)
 
-    # Adding tensorboard_log for real-time graph observation
+    # 4. Load the model into the safe sandbox
     model = PPO.load(model_load_path, env=env, device="auto", tensorboard_log=log_dir, custom_objects={
         "learning_rate": 1e-4, 
         "clip_range": 0.2,      
@@ -48,7 +78,7 @@ def train_rl_agent(timesteps=500000):
     checkpoint_callback = CheckpointCallback(
         save_freq=25000, 
         save_path=os.path.join(base_dir, "models", "rl_checkpoints"),
-        name_prefix="ppo_racing_max"
+        name_prefix="ppo_racing_constrained" 
     )
 
     print(f"\nSTARTING HIGH-SPEED PPO: {timesteps} Steps")
@@ -56,7 +86,7 @@ def train_rl_agent(timesteps=500000):
     
     try:
         model.learn(total_timesteps=timesteps, callback=checkpoint_callback, reset_num_timesteps=False)
-        model.save(os.path.join(base_dir, "models", "rl_final_optimized_agent"))
+        model.save(os.path.join(base_dir, "models", "rl_final_constrained_agent"))
         print("\nSUCCESS: Training complete.")
     except KeyboardInterrupt:
         print("\nManually Interrupted.")
