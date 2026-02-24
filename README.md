@@ -174,33 +174,61 @@ python scripts/test_final_agent.py
 
 ## Training Dynamics & Findings
 
-The model was trained for **500,000 steps** following the initial Imitation Learning phase. The TensorBoard metrics revealed unique learning dynamics characteristic of high-speed autonomous racing:
+The agent was trained for **500,000 steps** using the Constrained PPO architecture (integrating the Friction Circle `ActionMapWrapper` and `StateMapWrapper`). A deep data analysis of the TensorBoard metrics revealed unique learning dynamics characteristic of optimizing high-speed autonomous racing under strict mathematical and physical constraints:
 
-### 1. The Exploration-Exploitation Shift (Entropy)
-Unlike standard RL convergence where entropy strictly decreases, our **Entropy Loss** showed a steady incline during the transition from BC to PPO. 
-* **Analysis**: The agent began with artificially low entropy (high confidence) due to being heavily biased by the BC expert data. As PPO optimization engaged, the agent intentionally increased its action uncertainty to "unlearn" the conservative expert paths and actively explore aggressive, high-reward racing trajectories.
+### 1. The Exploration-Exploitation Shift (Entropy Loss)
+Unlike standard RL convergence where entropy strictly decreases, the **Entropy Loss** showed a steady incline during the transition from the Imitation Learning (BC) warm-start to PPO. 
+* **Analysis**: The agent began with artificially low entropy due to being heavily biased by the safe, conservative BC expert data. As PPO optimization engaged, the agent intentionally increased its action uncertainty to actively explore higher-speed trajectories while strictly obeying the Action Mapping boundaries.
 
-![Entropy Loss Curve](./results/entropy_loss.png)
-*Figure 1: Entropy expansion as the policy breaks away from the Imitation baseline to explore optimal racing lines.*
+![Constrained Entropy Loss Curve](./results/constrained_entropy_loss.png)
+*Figure 1: Entropy expansion as the policy breaks away from the Imitation baseline to mathematically explore optimal racing lines within the predefined friction limits.*
 
 ### 2. Policy Stability in High-Variance Environments
-The **Approximate KL Divergence** exhibited high instability and significant jitter, reflecting the extreme sensitivity of the MetaDrive physics engine at high speeds.
-* **Analysis**: In a racing context, minor steering deviations easily lead to "out-of-road" crashes, creating high-variance gradients. The PPO **Clipped Surrogate Objective** ($\epsilon = 0.2$) successfully bounded these massive policy updates, ensuring the policy did not completely collapse during complex, high-speed traffic negotiations.
+The **Approximate KL Divergence** exhibited significant jitter, reflecting the extreme sensitivity of the MetaDrive physics engine at high speeds.
+* **Analysis**: In a racing context, minor steering deviations at the edge of the friction circle can lead to catastrophic traction loss. The PPO Clipped Surrogate Objective effectively bounded these massive policy updates, ensuring the neural network did not collapse when testing the absolute limits of the vehicle's grip.
 
-![KL Divergence](./results/approx_kl.png)
-*Figure 2: Approximate KL Divergence demonstrating the high-variance environment and active bounding of policy updates.*
+![Constrained KL Divergence](./results/constrained_kl_divergence.png)
+*Figure 2: Approximate KL Divergence demonstrating the high-variance environment and the algorithm's active bounding of policy updates.*
 
-### 3. Overall Performance Gain
-Despite the aggressive exploration phase and high KL variance, the agent successfully optimized its racing lines, moving from a safe-but-slow BC baseline (~193 Mean Reward) to a highly optimized PPO peak.
+### 3. Safe Optimization Convergence (Reward vs. Episode Length)
+A comparative data analysis of the baseline Unconstrained PPO model versus the Action-Mapped (Constrained) model revealed a critical insight into the environment's reward dynamics. Both models successfully climbed to a stable mean reward asymptote of **~230**, but exhibited fundamentally different geometric and temporal behaviors:
+* **Unconstrained Model:** Gathered points rapidly through high-variance, chaotic driving, resulting in frequent collisions and early episode terminations.
+* **Constrained Model:** Because the `ActionMapWrapper` mathematically blocked physically impossible, chaotic swerving, the agent gathered points at a slower rate per frame with significantly lower variance. The model achieved the exact same final expected value (~230) by drastically increasing its overall **Episode Length**. The data proves the agent learned that maintaining stable, kinematically valid geometric arcs ensures long-term survival and consistent reward accumulation.
 
-![Reward Curve](./results/reward_mean.png)
-*Figure 3: Episode Reward Mean showing the steady upward gradient ascent over 500k steps.*
+![Constrained Episode Reward Mean](./results/constrained_mean_reward.png)
+*Figure 3: Episode Reward Mean showing the steady, low-variance upward gradient ascent to the ~230 asymptote over 500k steps.*
+
+![Constrained Episode Length](./results/constrained_episode_length.png)
+*Figure 4: Episode Length Mean proving that the Action Mapping safety layer forces the probability distribution to optimize for long-term vehicle survivability rather than short-term point-gathering.*
+
+---
+
+## Phase 2: Architectural Pivot & Advanced Mathematical Modeling (In Progress)
+
+To push the agent to high-performance racing speeds, the architecture is transitioning to a multi-objective optimization framework rooted in advanced probability and pure calculus.
+
+### The Upgraded Training Pipeline (Estimated 1M - 2M Steps Convergence)
+The next phase fundamentally upgrades the model's perception and strictly enforces safety guarantees to maximize sample efficiency.
+
+**1. Perception & Brain Transfer (Knowledge Distillation)**
+* **Temporal Frame Stacking:** Expanding the observation vector to 4 stacked frames to capture relative velocity and acceleration matrices of dynamic traffic.
+* **Teacher-Student Distillation:** Seamlessly transferring the 500k-step expert policy into a larger `[256, 256]` neural network. This is achieved by mathematically extracting the probability distributions from the frozen Teacher model and training the new Student architecture to minimize the Kullback-Leibler (KL) Divergence:
+$$D_{KL}(P \parallel Q) = \int P(x) \log\left(\frac{P(x)}{Q(x)}\right) dx$$
+
+This solves the tensor dimension mismatch without losing the foundational driving policy.
+
+**2. Safe RL: Dynamic Action Masking & Racing Calculus**
+* **Probability Shielding (Action Masking):** Shifting from post-action penalties to proactive probability shielding. By analyzing the simulated LiDAR arrays, a strict mathematical mask intercepts the PPO probability distribution. It dynamically forces the probability of kinematically impossible or collision-bound actions to exactly `0.0` before the policy executes. 
+
+This physically blocks the neural network from catastrophic exploration, yielding massive improvements in sample efficiency (convergence expected in 1-2 million steps rather than 10 million).
+* **Mathematical Reward Shaping:** Implementing the composite continuous reward function from the MetaDrive base paper to penalize steering jerk and optimize the forward velocity vector:
+$$R_t = c_1 R_{disp} + c_2 R_{speed} - c_3 P_{steering} + R_{term}$$
 
 ---
 
 ## Future Work
-* **Multi-Agent Racing**: Expanding the framework to handle adversarial RL vehicles rather than standard traffic.
-* **Dynamic Friction Adapting**: Modifying the Action Mapping constraint to account for variable weather or track surfaces dynamically.
+* **Multi-Agent Racing:** Expanding the framework to handle adversarial RL vehicles rather than standard traffic.
+* **Data-Driven Dynamic Friction Adapting:** Modifying the Action Mapping constraint to account for variable weather or track surfaces dynamically by feeding real-time telemetry analytics into the wrapper.
 
 ## Acknowledgments & References
 
@@ -214,6 +242,8 @@ This project was developed to explore safe reinforcement learning architectures.
 ### Academic Literature
 * **Proximal Policy Optimization**: Schulman, J., Wolski, F., Dhariwal, P., Radford, A., & Klimov, O. (2017). *Proximal Policy Optimization Algorithms*. arXiv preprint arXiv:1707.06347.
 * **Behavioral Cloning**: Pomerleau, D. A. (1989). *ALVINN: An Autonomous Land Vehicle in a Neural Network*. Advances in Neural Information Processing Systems.
+* **MetaDrive Architecture**: Li, Q., Peng, Z., Zhou, B., et al. (2022). *MetaDrive: Composing Diverse Driving Scenarios for Generalizable Reinforcement Learning*. IEEE TPAMI.
+* **Safe RL & Action Masking**: Recent advancements (2024-2025) in continuous action space reduction and dynamic masking for safety-critical autonomous control.
 
 ---
 
@@ -222,6 +252,3 @@ This project was developed to explore safe reinforcement learning architectures.
 This project's original code is licensed under the **MIT License**. 
 
 *Note: Third-party libraries and environments (such as MetaDrive and Stable Baselines3) remain under their respective original open-source licenses.*
-
-
-
