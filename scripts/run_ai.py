@@ -8,11 +8,7 @@ from stable_baselines3.common.callbacks import CheckpointCallback
 from metadrive.envs import MetaDriveEnv
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-# Import your custom B.Tech safety package
 from src.safety import ActionMapWrapper, StateMapWrapper
-
-# --- COMPATIBILITY FIX ---
 class CompatWrapper(gym.Wrapper):
     """Fixes API mismatch by stripping 'options' and ensuring tuple returns."""
     def reset(self, *, seed=None, options=None):
